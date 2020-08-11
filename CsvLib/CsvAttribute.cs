@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CsvHelperTest
+namespace CsvLibrary
 {
     public class CsvReader<T> : CsvActor<T>, IDisposable where T : new()
     {
