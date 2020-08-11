@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -31,7 +32,7 @@ namespace CsvLibrary
             _writer = new StreamWriter(filePath, append);
 
             // This ensures we write a header, if needed... i think
-            _haveWrittenHeader = !_typeAttr.HasHeader || fileExists || !append;
+            _haveWrittenHeader = !_typeAttr.HasHeader || fileExists || append;
         }
 
         /// <summary>
@@ -43,7 +44,7 @@ namespace CsvLibrary
             if (!_haveWrittenHeader)
             {
                 // Use reflected data to get and append-join header on the delimiter
-                _writer.Write(
+                _writer.WriteLine(
                     new StringBuilder().AppendJoin(_typeAttr.Delimiter, _fields.Select(fld => fld.pi.Name)).ToString());
 
                 // Flip the flag to make sure we dont write it again
@@ -99,7 +100,8 @@ namespace CsvLibrary
             foreach (var record in records)
             {
                 // Append fields across the delimiter
-                sb.AppendJoin(_typeAttr.Delimiter, _fields.Select(f => _FieldToString(f, record)));
+                var strings = _fields.Select(f => _FieldToString(f, record));
+                sb.AppendJoin(_typeAttr.Delimiter, strings);
 
                 // Write line to file
                 _writer.WriteLine(sb.ToString());
@@ -138,9 +140,22 @@ namespace CsvLibrary
         }
 
         // Custom mathod to handle formatting
-        private string _FieldToString(CsvPropertyInfo f, object record)
-            => f.pi.PropertyType == typeof(DateTime)
-                ? (f.getter.Invoke(record, null) as DateTime?)?.ToString(f.attr.FormatString) ?? string.Empty
-                : f.getter.Invoke(record, null).ToString();
+        internal string _FieldToString(CsvPropertyInfo f, object record)
+        {
+            // Expressions are impossible to debug.
+            if (f.pi.PropertyType == typeof(DateTime) || f.pi.PropertyType == typeof(DateTime?))
+            {
+                var dt = f.getter.Invoke(record, null) as DateTime?;
+                var format = f.attr?.FormatString
+                          ?? _typeAttr.DateTimeFormatString
+                          ?? CultureInfo.CurrentCulture.DateTimeFormat.LongDatePattern;
+                var dts = dt?.ToString(format) ?? string.Empty;
+                return dts;
+            }
+            else
+            {
+                return f.getter.Invoke(record, null).ToString();
+            }
+        }
     }
 }

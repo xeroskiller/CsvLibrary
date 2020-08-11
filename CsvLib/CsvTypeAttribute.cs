@@ -8,18 +8,20 @@ namespace CsvLibrary
         public string LineDelimiter { get; set; } = Environment.NewLine;
         public string FieldQuote { get; set; } = @"""";
         public bool HasHeader { get; set; } = true;
+        public string DateTimeFormatString { get; set; } = null;
 
         public CsvTypeAttribute(string delimiter = null,
                                 string lineDelimiter = null,
                                 string fieldQuote = null,
-                                bool? hasHeader = null)
+                                bool hasHeader = true,
+                                string dateTimeFormatString = null)
         {
             Delimiter = delimiter ?? Delimiter;
             LineDelimiter = lineDelimiter ?? LineDelimiter;
             FieldQuote = fieldQuote ?? FieldQuote;
-            HasHeader = hasHeader ?? true;
+
+            HasHeader = hasHeader;
+            DateTimeFormatString = dateTimeFormatString;
         }
     }
-
-
 }
