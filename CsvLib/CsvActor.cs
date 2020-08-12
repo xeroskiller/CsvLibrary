@@ -35,7 +35,7 @@ namespace CsvLibrary
                                                     prop.GetCustomAttribute<CsvFieldAttribute>(),
                                                     prop.GetGetMethod(),
                                                     prop.GetSetMethod()))
-                .OrderBy(tpl => tpl.attr?.Index ?? int.MaxValue) // Order by index...
+                .OrderBy(tpl => tpl.attr?.Index) // Order by index...
                 .ThenBy(tpl => tpl.pi.Name) // then by property name
                 .Where(tpl => tpl.attr != null || tpl.setter != null) // Either has the attribute or is public (has setter)
                 .ToArray();
