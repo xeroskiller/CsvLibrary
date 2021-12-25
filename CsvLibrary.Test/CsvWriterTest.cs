@@ -1,4 +1,3 @@
-using CsvLibrary;
 using FluentAssertions;
 using System;
 using System.Collections.Generic;
@@ -8,21 +7,21 @@ using Xunit;
 
 namespace CsvLibrary.Test
 {
-    public class CsvWriterTest
+    public class CsvWriterTest : TestBase
     {
         internal const string _DATETIME_FORMAT = "yyyyMMdd";
         public static IEnumerable<object[]> Data =>
             new List<object[]>
             {
-                    new object[] { new DateTime(1900, 1, 1).ToString(_DATETIME_FORMAT) }
-                ,   new object[] { new DateTime(2020, 8, 10).ToString(_DATETIME_FORMAT) }
+                    new object[] { new DateTime(1900, 1, 1) }
+                ,   new object[] { new DateTime(2020, 8, 10) }
             };
 
         [Fact]
         public void CsvWriter_WritesTypeAsExpected_Simple()
         {
             var testData = Enumerable.Range(1, 2).Select(n => new TestCsvType(n));
-            var outputFile = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            var outputFile = GetTempRandomFileName();
 
             using (var writer = new CsvWriter<TestCsvType>(outputFile))
                 writer.WriteRecords(testData);
@@ -43,10 +42,9 @@ namespace CsvLibrary.Test
         [MemberData(nameof(Data))]
         public void CsvWriter_ConvertsDateTimeProperty_FollowsTypeLevelFormat(DateTime dt)        
         {
-
             var str = dt.ToString(_DATETIME_FORMAT);
-            // var dt = DateTime.ParseExact(str, _DATETIME_FORMAT, null);
-            var outputFile = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+
+            var outputFile = GetTempRandomFileName();
 
             var writer = new CsvWriter<TempTypeFormat>(outputFile);
 
@@ -67,7 +65,7 @@ namespace CsvLibrary.Test
 
             var str = dt.ToString(_DATETIME_FORMAT);
             // var dt = DateTime.ParseExact(str, _DATETIME_FORMAT, null);
-            var outputFile = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            var outputFile = GetTempRandomFileName();
 
             var writer = new CsvWriter<TempTypeFormat>(outputFile);
 
@@ -81,34 +79,14 @@ namespace CsvLibrary.Test
             Assert.Equal(result, str);
         }
 
-        [CsvType(DateTimeFormatString = _DATETIME_FORMAT)]
+        [CsvType(dateTimeFormatString: _DATETIME_FORMAT)]
         class TempTypeFormat { public DateTime test_datetime { get; set; } }
 
-        [CsvType] class TempFieldFormat { [CsvField(FormatString = "yyyy-MM-dd")] public DateTime test_datetime { get; set; } }
-    }
-
-    [CsvType(DateTimeFormatString = CsvWriterTest._DATETIME_FORMAT)]
-    internal class TestCsvType
-    {
-        public int test_int { get; set; }
-        public long test_long { get; set; }
-        public string test_string { get; set; }
-        public double test_double { get; set; }
-        public decimal test_decimal { get; set; }
-        public DateTime? test_datetime { get; set; }
-        public bool test_bool { get; set; }
-
-        public TestCsvType() { }
-
-        public TestCsvType(int n)
-        {
-            test_int = n;
-            test_long = n * 2;
-            test_string = (n * 5).ToString();
-            test_double = n * 7;
-            test_decimal = n * 11;
-            test_datetime = (new DateTime(1900, 1, 1)).AddDays(n);
-            test_bool = n % 2 == 0;
+        [CsvType] 
+        class TempFieldFormat 
+        { 
+            [CsvField(FormatString = "yyyy-MM-dd")] 
+            public DateTime test_datetime { get; set; } 
         }
     }
 }
